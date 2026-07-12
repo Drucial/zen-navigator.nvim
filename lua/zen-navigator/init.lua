@@ -25,7 +25,9 @@ local function send(payload)
   if not under_zenterm() then
     return
   end
-  local ok, chan = pcall(vim.fn.sockconnect, "pipe", sock, {})
+  -- No opts table: an empty Lua `{}` marshals to an empty *list*, and sockconnect
+  -- rejects it with "E475: expected dictionary". Omitting it opens a raw byte channel.
+  local ok, chan = pcall(vim.fn.sockconnect, "pipe", sock)
   if not ok or chan == 0 then
     return
   end
