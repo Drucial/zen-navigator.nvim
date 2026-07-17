@@ -1,7 +1,7 @@
 # zen-navigator.nvim
 
 `Ctrl-h/j/k/l` navigation that walks across **Neovim splits** and
-**[ZenTerm](https://github.com/Drucial/zen-term-releases) panes** as one motion.
+**[ZenTerm](https://github.com/zen-term/zen-term-releases) panes** as one motion.
 The `vim-tmux-navigator` idea, without tmux, and backend-agnostic: it works on
 ZenTerm's default Ghostty backend with no process-probing.
 
@@ -26,7 +26,7 @@ portable.
 
 ## Requirements
 
-- [ZenTerm](https://github.com/Drucial/zen-term-releases) 0.1.0 or later.
+- [ZenTerm](https://github.com/zen-term/zen-term-releases) 0.1.0 or later.
 - Neovim 0.7+ (uses `vim.keymap`, `vim.api.nvim_create_autocmd`).
 
 ## Install
@@ -41,7 +41,7 @@ With [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
-  "Drucial/zen-navigator.nvim",
+  "zen-term/zen-navigator.nvim",
   event = "VeryLazy",
   opts = {},
 }
@@ -50,7 +50,7 @@ With [lazy.nvim](https://github.com/folke/lazy.nvim):
 Or with [packer](https://github.com/wbthomason/packer.nvim):
 
 ```lua
-use({ "Drucial/zen-navigator.nvim", config = function() require("zen-navigator").setup() end })
+use({ "zen-term/zen-navigator.nvim", config = function() require("zen-navigator").setup() end })
 ```
 
 ### 2. ZenTerm keybinds
@@ -91,6 +91,6 @@ require("zen-navigator").setup({
 ## Protocol
 
 The socket contract is documented at
-[`docs/nvim-navigator-protocol.md`](https://github.com/Drucial/zen-term-releases/blob/main/docs/nvim-navigator-protocol.md)
+[`docs/nvim-navigator-protocol.md`](https://github.com/zen-term/zen-term-releases/blob/main/docs/nvim-navigator-protocol.md)
 in the ZenTerm releases repo. Both ends are written against it, and nothing in it
 depends on the terminal backend.
