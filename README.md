@@ -1,9 +1,9 @@
 # zen-navigator.nvim
 
-Seamless `Ctrl-h/j/k/l` navigation that walks across **Neovim splits** and
-**[ZenTerm](https://github.com/Drucial/zen-term) panes** as one motion — like
-`vim-tmux-navigator`, but for ZenTerm and backend-agnostic (works on ZenTerm's
-default Ghostty backend, no process-probing).
+`Ctrl-h/j/k/l` navigation that walks across **Neovim splits** and
+**[ZenTerm](https://github.com/Drucial/zen-term-releases) panes** as one motion.
+The `vim-tmux-navigator` idea, without tmux, and backend-agnostic: it works on
+ZenTerm's default Ghostty backend with no process-probing.
 
 Press `Ctrl-h` at the left edge of your Neovim splits and focus crosses into the
 ZenTerm pane on the left. From a shell pane, `Ctrl-h` walks back into Neovim and
@@ -11,8 +11,8 @@ continues through its splits.
 
 ## How it works
 
-Both detection and hand-off ride ZenTerm's nav socket (`$ZEN_SOCK`), which ZenTerm
-injects into every pane along with a per-pane token (`$ZEN_PANE`):
+Both detection and hand-off ride ZenTerm's nav socket (`$ZEN_SOCK`), which
+ZenTerm injects into every pane along with a per-pane token (`$ZEN_PANE`):
 
 - On `VimEnter`/`VimResume` the plugin tells ZenTerm this pane is running Neovim
   (and clears it on `VimLeave`/`VimSuspend`), so ZenTerm's key guard lets
@@ -20,18 +20,20 @@ injects into every pane along with a per-pane token (`$ZEN_PANE`):
 - When Neovim is at its edge split and can't move further, it asks ZenTerm to
   move pane focus in that direction.
 
-Outside ZenTerm (`$ZEN_SOCK`/`$ZEN_PANE` unset) every mapping degrades to a plain
-`wincmd`, so the plugin is inert and harmless anywhere else.
+Outside ZenTerm (`$ZEN_SOCK` and `$ZEN_PANE` unset) every mapping falls back to a
+plain `wincmd`, so the plugin is inert anywhere else and your config stays
+portable.
 
 ## Requirements
 
-- ZenTerm with the nvim navigator (ZEN-30) support.
+- [ZenTerm](https://github.com/Drucial/zen-term-releases) 0.1.0 or later.
 - Neovim 0.7+ (uses `vim.keymap`, `vim.api.nvim_create_autocmd`).
 
 ## Install
 
-Both sides opt in. **This is not a default rebind** — ZenTerm's default `⌘-hjkl`
-pane nav is untouched.
+Both sides opt in, and both steps are required. This is not a default rebind:
+ZenTerm's own `⌘-hjkl` pane nav is untouched, and the plugin only diverts a chord
+ZenTerm already treats as pane nav.
 
 ### 1. The plugin
 
@@ -53,16 +55,19 @@ use({ "Drucial/zen-navigator.nvim", config = function() require("zen-navigator")
 
 ### 2. ZenTerm keybinds
 
-Bind `ctrl+hjkl` to pane nav in your ZenTerm keybind config so ZenTerm has
-something to hand off — the plugin's guard only diverts a chord ZenTerm would
-otherwise treat as nav:
+Give ZenTerm the chord to hand off. Add these to `~/.config/zen-term/config`, or
+set them in ZenTerm's Settings (`⌘,`) under Keybinds:
 
 ```
-ctrl+h = nav_left
-ctrl+j = nav_down
-ctrl+k = nav_up
-ctrl+l = nav_right
+keybind = nav_left=ctrl+h
+keybind = nav_down=ctrl+j
+keybind = nav_up=ctrl+k
+keybind = nav_right=ctrl+l
 ```
+
+The `keybind = <action>=<chord>` shape matters, action first. ZenTerm ignores
+unknown config keys without complaining, so a line written the other way around
+does nothing and reports nothing.
 
 ## Configuration
 
@@ -76,13 +81,16 @@ require("zen-navigator").setup({
 ## Caveats
 
 - **Ctrl-hjkl is claimed when you opt in.** Non-Neovim TUIs (htop, less) in a
-  shell pane lose those keys to pane nav, same tradeoff as tmux/kitty. ZenTerm's
-  default `⌘-hjkl` never has this problem.
+  shell pane lose those keys to pane nav. That is the same tradeoff tmux and
+  kitty make. ZenTerm's default `⌘-hjkl` never has this problem.
 - **Stale flag on a hard Neovim crash.** The nvim flag clears on
   `VimLeave`/`VimSuspend`; a hard crash can leave it set, so `Ctrl-h` reaches the
-  recovered shell (doing nothing) until it's reset. ZenTerm's `⌘-hjkl` fallback
+  recovered shell and does nothing until it is reset. ZenTerm's `⌘-hjkl` fallback
   always works.
 
 ## Protocol
 
-The socket contract lives in the ZenTerm repo at `docs/nvim-navigator-protocol.md`.
+The socket contract is documented at
+[`docs/nvim-navigator-protocol.md`](https://github.com/Drucial/zen-term-releases/blob/main/docs/nvim-navigator-protocol.md)
+in the ZenTerm releases repo. Both ends are written against it, and nothing in it
+depends on the terminal backend.
